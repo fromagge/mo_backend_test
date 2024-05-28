@@ -36,7 +36,9 @@ DJANGO_APPS = [
     'django_extensions',
 ]
 
-LOCAL_APPS = []
+LOCAL_APPS = [
+    'apps.customer'
+]
 
 THIRD_PARTY_APPS = [
 
