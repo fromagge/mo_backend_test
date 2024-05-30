@@ -15,6 +15,10 @@ class Customer(models.Model):
 	updated_at = models.DateTimeField(auto_now=True)
 
 	@property
+	def active_loans_list(self):
+		return self.loans.filter(status=2, customer=self).all()
+
+	@property
 	def total_available_credit(self):
 		debt = self.score - self.current_outstanding_credit
 		if debt < 0:
@@ -22,5 +26,15 @@ class Customer(models.Model):
 		return debt
 
 	@property
+	def active_loans(self):
+		return self.loans.filter(status=2, customer=self)
+
+	@property
 	def current_outstanding_credit(self):
-		return self.loans.aggregate(models.Sum('outstanding_balance'))['outstanding_balance__sum']
+		all_loans = self.loans.filter(status=2, customer=self).all()
+		_sum = 0
+		for loan in all_loans:
+			_sum += loan.outstanding_balance
+
+		return _sum
+

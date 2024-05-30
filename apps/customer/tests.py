@@ -1,4 +1,3 @@
-from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 from apps.customer.models import Customer
@@ -11,4 +10,7 @@ class CustomerTestCase(TestCase):
 	def test_customer_status(self):
 		customer = Customer.objects.get(external_id="123456")
 		self.assertEqual(customer.external_id, "123456")
+		self.assertEqual(customer.status, 1)
+
+
 
