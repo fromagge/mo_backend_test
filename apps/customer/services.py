@@ -1,4 +1,5 @@
 from django.db import transaction
+from rest_framework.exceptions import ValidationError, NotFound
 
 from apps.customer.models import Customer
 
@@ -11,7 +12,10 @@ class CustomerService:
 
 	@staticmethod
 	def get_user_external_id(external_id: str):
-		return Customer.objects.get(external_id=external_id)
+		try:
+			return Customer.objects.get(external_id=external_id)
+		except Customer.DoesNotExist:
+			raise NotFound({'details': 'The user does not exist'})
 
 	@staticmethod
 	@transaction.atomic
@@ -20,7 +24,7 @@ class CustomerService:
 
 		customer = CustomerService.get_user_external_id(external_id)
 		if customer.active_loans.count() < 1:
-			raise ValueError('The user does not have any active loans')
+			raise ValidationError('The user does not have any active loans')
 
 		debt = customer.current_outstanding_credit
 		# If the amount that the user is trying to pay is greater than the debt,
@@ -50,3 +54,16 @@ class CustomerService:
 			payment_detail.save()
 
 		return payment
+
+	@staticmethod
+	def create_customer(payload, save=True):
+		external_id = payload.pop('external_id')
+		if Customer.objects.filter(external_id=external_id).exists():
+			raise ValidationError('The customer already exists')
+
+		customer = Customer.objects.create(external_id=external_id, **payload)
+
+		if save:
+			customer.save()
+
+		return customer

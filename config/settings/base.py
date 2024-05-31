@@ -34,6 +34,7 @@ DJANGO_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    'rest_framework'
 ]
 
 LOCAL_APPS = [
@@ -52,9 +53,6 @@ REST_FRAMEWORK = {
     ]
 }
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
-
-MIDDLEWARE = [
-]
 
 ROOT_URLCONF = 'config.urls'
 
