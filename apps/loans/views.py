@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.common import validate
-from apps.loans.serializers import LoanCreateSerializer, LoanDetailSerializer
+from apps.loans.serializers import LoanCreateSerializer, LoanDetailSerializer, LoanUpdateSerializer
 from apps.loans.services import LoanService
 
 
@@ -27,4 +27,9 @@ class LoanDetailView(APIView):
 		serialized_data = LoanDetailSerializer(loan)
 		return Response(serialized_data.data, 200)
 
+	@validate(LoanUpdateSerializer)
+	def update(self, request, external_id, *args, **kwargs):
+		loan = LoanService.change_load_status(external_id, request.data['status'])
 
+		serialized_data = LoanDetailSerializer(loan)
+		return Response(serialized_data.data, 200)

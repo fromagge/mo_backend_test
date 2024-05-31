@@ -10,5 +10,19 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+    environment:
+      DJANGO_SECRET_KEY: "secret123"
+      DB_NAME: "postgres"
+      DB_PWD: "mothecompany"
+      DB_USER: "postgres"
+      DB_HOST: "postgres"
+      DB_PORT: "5432"
+
 volumes:
   postgres-data:

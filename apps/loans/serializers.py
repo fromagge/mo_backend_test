@@ -33,3 +33,24 @@ class LoanDetailSerializer(BaseSerializer):
 		model = Loan
 		fields = ['external_id', 'customer_external_id', 'amount', 'outstanding_balance', 'contract_version', 'status']
 		fields_to_be_removed = ['contract_version']
+
+
+class LoadStatus:
+	pass
+
+
+class LoanUpdateSerializer(BaseSerializer):
+	status = serializers.IntegerField()
+
+	class Meta:
+		model = Loan
+		fields = ['status']
+		required_fields = ['status']
+
+		def validate(self, data):
+			try:
+				LoadStatus(data['status'])
+			except ValueError:
+				raise serializers.ValidationError({'status': 'Invalid status value'})
+
+			return data
