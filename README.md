@@ -67,6 +67,10 @@ docker-compose up -d
 If everything goes well, you should be able to access the API at http://localhost:8000 and the admin panel
 at http://localhost:8000/admin/. By default, this docker container creates a database and seeds it with dummy data.
 
+To run the test simply run
+
+`python manage.py test`
+
 # API structure
 
 The API is structured as follows:
