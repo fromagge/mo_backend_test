@@ -30,7 +30,7 @@ class CustomerService:
 		# If the amount that the user is trying to pay is greater than the debt,
 		#  we will not allow the payment to be made
 		if amount > debt:
-			return PaymentService.make_rejected_payment(customer=customer, amount=amount)
+			return PaymentService.make_rejected_payment(customer=customer, amount=amount), None
 
 		# If the amount is not greater we will start making payments on his loan until the amount is paid
 		remaining_amount = amount
@@ -53,7 +53,7 @@ class CustomerService:
 		for payment_detail in payment_details:
 			payment_detail.save()
 
-		return payment
+		return payment, payment_details
 
 	@staticmethod
 	def create_customer(payload, save=True):

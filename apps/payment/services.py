@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 from django.db import transaction
+from rest_framework.exceptions import ValidationError
 
 from apps.loans.services import LoanService, LoanStatus
 from apps.payment.models import Payment, PaymentDetail, PaymentStatus
@@ -10,8 +11,16 @@ from apps.payment.models import Payment, PaymentDetail, PaymentStatus
 class PaymentService:
 
 	@staticmethod
-	def get_payment(payment_id):
-		return Payment.objects.get(external_id=payment_id)
+	def get_payment(payment_id, include_details=False):
+		try:
+			payment = Payment.objects.get(external_id=payment_id)
+			if include_details:
+				payment_details = PaymentDetail.objects.filter(payment=payment).all()
+				return payment, payment_details
+			return payment
+		except Payment.DoesNotExist:
+			raise ValidationError({'details': 'The payment does not exist'})
+
 
 	@staticmethod
 	@transaction.atomic
@@ -46,7 +55,7 @@ class PaymentService:
 	def make_single_loan_payment(loan_id: str, payment: 'Payment', amount: float, save=True, omit_checks=False):
 		loan = LoanService.get_loan(loan_id)
 		if loan.status != LoanStatus.ACTIVE:
-			raise ValueError('The loan is not active')
+			raise ValidationError('The loan is not active')
 
 		loan_debt = loan.outstanding_balance
 		amount_to_pay = loan_debt if loan_debt <= amount else amount
