@@ -5,19 +5,19 @@ from drf_yasg import openapi
 from rest_framework import permissions
 
 schema_view = get_schema_view(
-   openapi.Info(
-      title="Mo...The company",
-      default_version='v1',
-      description="Test assigment for Mo...The company",
-      terms_of_service="https://www.wearemo.com/",
-   ),
-   public=True,
-   permission_classes=(permissions.AllowAny,),
+	openapi.Info(
+		title="Mo...The company",
+		default_version='v1',
+		description="Test assigment for Mo...The company",
+		terms_of_service="https://www.wearemo.com/",
+	),
+	public=True,
+	permission_classes=(permissions.AllowAny,),
 )
-
 
 urlpatterns = [
 	path('admin/', admin.site.urls),
+	path('auth/', include('apps.authentication.urls')),
 	path('customer/', include('apps.customer.urls')),
 	path('loan/', include('apps.loans.urls')),
 	path('payment/', include('apps.payment.urls')),

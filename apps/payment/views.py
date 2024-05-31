@@ -1,3 +1,5 @@
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -6,6 +8,7 @@ from apps.customer.services import CustomerService
 from apps.payment.models import PaymentStatus
 from apps.payment.serializers import PaymentCreateSerializer, PaymentSerializer, PaymentRejectedDetailSerializer, PaymentDetailSerializer
 from apps.payment.services import PaymentService
+from apps.permissions import UserIsOwner
 
 
 class PaymentCreateView(APIView):
@@ -29,6 +32,7 @@ class PaymentCreateView(APIView):
 
 class PaymentDetailView(APIView):
 
+	@permission_classes([IsAdminUser, UserIsOwner])
 	def get(self, request, external_id, *args, **kwargs):
 		payment, payment_details = PaymentService.get_payment(external_id, include_details=True)
 

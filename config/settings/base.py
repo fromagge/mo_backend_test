@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
+from datetime import timedelta
 from pathlib import Path
 
 # Heroku or not?
@@ -35,9 +36,12 @@ DJANGO_APPS = [
 	'django_extensions',
 	'rest_framework',
 	'drf_yasg',
+	'rest_framework_simplejwt.token_blacklist',
+
 ]
 
 LOCAL_APPS = [
+	'apps.authentication',
 	'apps.customer',
 	'apps.loans',
 	'apps.payment',
@@ -49,8 +53,7 @@ THIRD_PARTY_APPS = [
 REST_FRAMEWORK = {
 	'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
 	'DEFAULT_AUTHENTICATION_CLASSES': [
-		'rest_framework.authentication.TokenAuthentication',
-		'rest_framework.authentication.SessionAuthentication',
+		'rest_framework_simplejwt.authentication.JWTAuthentication'
 	]
 }
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -137,7 +140,7 @@ ACCOUNT_LOGOUT_REDIRECT_URL = '/'
 LOGIN_URL = '/auth/login'
 
 # Custom user model
-# AUTH_USER_MODEL = "authentication.CustomUser"
+AUTH_USER_MODEL = "authentication.CustomUser"
 
 # User Model Config (per https://krakensystems.co/blog/2020/custom-users-using-django-rest-framework)
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
@@ -153,3 +156,36 @@ ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/?verification=1'
 INTERNAL_IPS = [
 	"127.0.0.1",
 ]
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=180),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=50),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': False,
+
+    'ALGORITHM': 'HS256',
+
+    'VERIFYING_KEY': None,
+    'AUDIENCE': None,
+    'ISSUER': None,
+    'JWK_URL': None,
+    'LEEWAY': 0,
+
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.authentication.default_user_authentication_rule',
+
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+    'TOKEN_USER_CLASS': 'rest_framework_simplejwt.models.TokenUser',
+
+    'JTI_CLAIM': 'jti',
+
+    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
+    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+}
+

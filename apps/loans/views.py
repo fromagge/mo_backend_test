@@ -1,12 +1,16 @@
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.common import validate
 from apps.loans.serializers import LoanCreateSerializer, LoanDetailSerializer, LoanUpdateSerializer
 from apps.loans.services import LoanService
+from apps.permissions import UserIsOwner
 
 
 class LoanCreateView(APIView):
+	permission_classes = [IsAdminUser]
 
 	@validate(LoanCreateSerializer)
 	def post(self, request, payload, *args, **kwargs):
@@ -21,13 +25,17 @@ class LoanCreateView(APIView):
 
 class LoanDetailView(APIView):
 
+	@permission_classes([IsAdminUser, UserIsOwner])
 	def get(self, request, external_id, *args, **kwargs):
 		loan = LoanService.get_loan(external_id)
+
+		self.check_object_permissions(request, loan)
 
 		serialized_data = LoanDetailSerializer(loan)
 		return Response(serialized_data.data, 200)
 
 	@validate(LoanUpdateSerializer)
+	@permission_classes([IsAdminUser])
 	def update(self, request, external_id, *args, **kwargs):
 		loan = LoanService.change_load_status(external_id, request.data['status'])
 

@@ -2,7 +2,10 @@ from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 from django.test import TestCase
+from rest_framework.test import APIClient
+from django.urls import reverse
 
+from apps.authentication.models import CustomUser
 from apps.customer.models import Customer
 from apps.customer.services import CustomerService
 from apps.loans.models import LoanStatus, Loan
@@ -19,6 +22,18 @@ class CustomerTestCase(TestCase):
 	def setUp(self):
 		Customer.objects.create(external_id='1', score=10_250_000.321)
 		Customer.objects.create(external_id='2', score=10_250_000.321)
+
+		# Authentication
+
+		CustomUser.objects.create_user('testo', 'myemail@test.com', 'password', id="1", is_staff=True)
+		self.client = APIClient()
+		response = self.client.post(reverse('get_token'), {
+			'id': '1',
+			'username': "testo",
+			'password': 'password'
+		}, format='json')
+		self.token = response.data['access']
+		self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token)
 
 	def test_create_loan(self):
 		customer = Customer.objects.get(external_id="1")
