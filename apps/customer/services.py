@@ -30,7 +30,7 @@ class CustomerService:
 
 		# If the amount is not greater we will start making payments on his loan until the amount is paid
 		remaining_amount = amount
-		active_loans = Customer.active_loans_list
+		active_loans = customer.active_loans.all()
 
 		# Let's create a payment associated with the transaction
 		payment = PaymentService.create_payment(customer=customer, amount=amount)

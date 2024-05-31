@@ -83,7 +83,7 @@ class CustomerTestCase(TestCase):
 		payment = PaymentService.create_payment(customer=customer, amount=500_000)
 		payment.status = PaymentStatus.REJECTED
 		payment.save()
-		PaymentService.make_single_loan_payment(loan_id=loan.external_id,payment=payment, amount=500_000)
+		PaymentService.make_single_loan_payment(loan_id=loan.external_id, payment=payment, amount=500_000)
 		self.assertEqual(loan.outstanding_balance, 3_500_000)
 
 	def create_loan_test(self, amount, status, customer):
