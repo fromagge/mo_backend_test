@@ -4,6 +4,9 @@ from rest_framework import permissions
 class UserIsOwner(permissions.BasePermission):
 
 	def has_object_permission(self, request, view, obj):
+		if request.user.is_staff:
+			return True
+
 		match type(obj).__class__.__name__:
 			case 'Loan':
 				return obj.customer == request.user

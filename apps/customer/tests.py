@@ -80,11 +80,11 @@ class CustomerTestCase(TestCase):
 		self.assertIn('details', response.data)
 		self.assertEqual(response.data['details'], 'The user does not exist')
 
-		LoanService.create_loan(user_id='123456', loan_amount=5_000_000, loan_details={
+		LoanService.create_loan(user_id='123456', loan_amount=5_000_000.0, loan_details={
 			'external_id': '145',
 			'maximum_payment_date': datetime.now(timezone.utc)})
 
-		LoanService.create_loan(user_id='123456', loan_amount=5_000_000, loan_details={
+		LoanService.create_loan(user_id='123456', loan_amount=5_000_000.0, loan_details={
 			'external_id': '146',
 			'maximum_payment_date': datetime.now(timezone.utc)})
 

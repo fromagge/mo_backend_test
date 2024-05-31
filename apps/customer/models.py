@@ -12,7 +12,7 @@ class Customer(models.Model):
 	__tablename__ = 'customers_customer'
 	status = models.SmallIntegerField(choices=CustomerStatus.choices, default=CustomerStatus.ACTIVE)
 	external_id = models.CharField(max_length=60, unique=True)
-	score = models.DecimalField(max_digits=20, decimal_places=10, default=0, validators=[MinValueValidator(0)])
+	score = models.DecimalField(max_digits=20, decimal_places=10, default=0.0, validators=[MinValueValidator(0.0)])
 	preapproved_at = models.DateTimeField(null=True, blank=True, validators=[MaxValueValidator(limit_value=datetime.now(tz=timezone.utc))])
 
 	created_at = models.DateTimeField(auto_now_add=True)
