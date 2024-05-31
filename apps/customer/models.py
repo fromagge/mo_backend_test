@@ -30,6 +30,10 @@ class Customer(models.Model):
 		return self.loans.filter(status=2, customer=self)
 
 	@property
+	def all_loans(self):
+		return self.loans.filter(customer=self)
+
+	@property
 	def current_outstanding_credit(self):
 		all_loans = self.loans.filter(status=2, customer=self).all()
 		_sum = 0

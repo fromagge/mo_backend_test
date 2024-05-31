@@ -67,3 +67,11 @@ class CustomerService:
 			customer.save()
 
 		return customer
+
+	@staticmethod
+	def get_customer_loans(external_id: str, only_active: bool = True):
+		customer = CustomerService.get_user_external_id(external_id)
+		if only_active:
+			return customer.active_loans.all()
+
+		return customer.all_loans.all()

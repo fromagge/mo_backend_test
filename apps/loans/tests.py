@@ -18,11 +18,12 @@ def one_year_from_now():
 class CustomerTestCase(TestCase):
 	def setUp(self):
 		Customer.objects.create(external_id='1', score=10_250_000.321)
+		Customer.objects.create(external_id='2', score=10_250_000.321)
 
 	def test_create_loan(self):
 		customer = Customer.objects.get(external_id="1")
 
-		# Let's create a loan an make sure it's active
+		# Let's create a loan and make sure it's active
 
 		loan_amount = 5_000_000
 		loan_external_id = '1'
@@ -112,3 +113,29 @@ class CustomerTestCase(TestCase):
 		# Let's make a payment
 		CustomerService.make_payment(external_id=customer.external_id, amount=4_000_000)
 		self.assertEqual(customer.total_available_credit, customer.score - 2_000_000)
+
+	# Let's test the endpoints
+
+	def test_create_loan_endpoint(self):
+		response = self.client.post('/loan/', {'external_id': '145', 'customer_external_id': '2', 'amount': 5_000_000.0, 'maximum_payment_date': one_year_from_now()})
+		self.assertEqual(response.status_code, 201)
+		self.assertEqual(response.data['customer_external_id'], '2')
+		self.assertEqual(float(response.data['amount']), 5_000_000.0)
+		self.assertEqual(response.data['status'], LoanStatus.PENDING)
+
+		response = self.client.post('/loan/', {'external_id': '2', 'customer_external_id': '2', 'amount': 11_000_000.0, 'maximum_payment_date': one_year_from_now()})
+		self.assertEqual(response.status_code, 400)
+		self.assertIn('details', response.data)
+		self.assertEqual(response.data['details'], 'The loan amount exceeds the available credit of the user')
+
+	def test_get_loan_endpoint(self):
+		Loan.objects.create(external_id='1', amount=9_000_000, status=LoanStatus.ACTIVE, maximum_payment_date=one_year_from_now(), customer=Customer.objects.get(external_id='2'))
+		response = self.client.get('/loan/1/')
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(response.data['customer_external_id'], '2')
+		self.assertEqual(float(response.data['amount']), 9_000_000)
+
+		response = self.client.get('/loan/3/')
+		self.assertEqual(response.status_code, 404)
+		self.assertIn('details', response.data)
+		self.assertEqual(response.data['details'], 'The loan does not exist')

@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from django.test import TestCase
 
 from apps.customer.models import Customer
+from apps.loans.services import LoanService
 
 
 class CustomerTestCase(TestCase):
@@ -17,7 +18,10 @@ class CustomerTestCase(TestCase):
 	# Test endpoints
 
 	def test_create_customer(self):
-		response = self.client.post('/customer/', {'external_id': '123', 'status': 1, 'score': 10_250_000})
+		response = self.client.post('/customer/', {
+			'external_id': '123',
+			'status': 1,
+			'score': 10_250_000})
 
 		self.assertEqual(response.status_code, 201)
 		self.assertEqual(response.data['external_id'], '123')
@@ -29,7 +33,11 @@ class CustomerTestCase(TestCase):
 		self.assertEqual(customer.score, 10_250_000)
 
 		time_in_future = datetime.now(timezone.utc).replace(year=2025)
-		response = self.client.post('/customer/', {'external_id': '123', 'status': 3, 'score': 10_250_000, 'preapproved_at': time_in_future})
+		response = self.client.post('/customer/', {
+			'external_id': '123',
+			'status': 3,
+			'score': 10_250_000,
+			'preapproved_at': time_in_future})
 		self.assertEqual(response.status_code, 400)
 
 		self.assertIn('external_id', response.data)
@@ -47,6 +55,28 @@ class CustomerTestCase(TestCase):
 		self.assertIn('details', response.data)
 		self.assertEqual(response.data['details'], 'The user does not exist')
 
+	def test_get_customer_loans(self):
+		response = self.client.get('/customer/123456/loans')
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(len(response.data), 0)
 
+		response = self.client.get('/customer/1234567/loans')
+		self.assertEqual(response.status_code, 404)
+		self.assertIn('details', response.data)
+		self.assertEqual(response.data['details'], 'The user does not exist')
 
+		LoanService.create_loan(user_id='123456', loan_amount=5_000_000, loan_details={
+			'external_id': '145',
+			'maximum_payment_date': datetime.now(timezone.utc)})
 
+		LoanService.create_loan(user_id='123456', loan_amount=5_000_000, loan_details={
+			'external_id': '146',
+			'maximum_payment_date': datetime.now(timezone.utc)})
+
+		response = self.client.get('/customer/123456/loans')
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(len(response.data), 0)
+
+		response = self.client.get('/customer/123456/loans?only_active=false')
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(len(response.data), 2)
